@@ -1,3 +1,4 @@
+// blood_bank/model/bloodTransaction.js
 const mongoose = require('mongoose');
 
 const transactionSchema = new mongoose.Schema({
@@ -8,7 +9,7 @@ const transactionSchema = new mongoose.Schema({
   },
   component: { 
     type: String, 
-    enum: ['WB', 'PC','FFP','PRP'], 
+    enum: ['WB', 'PC', 'FFP', 'PRP'], 
     required: true 
   },
   quantity: { 
@@ -21,8 +22,39 @@ const transactionSchema = new mongoose.Schema({
     enum: ['Add', 'Issue', 'Expired'], 
     required: true 
   },
-  date: { type: Date, default: Date.now }
-  // performedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // Auth ထည့်ရင် ဒီနေရာမှာ ထည့်ပါမယ်။
+  // ✅ လုပ်ဆောင်သူအချက်အလက်များ
+  performedBy: {
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    username: {
+      type: String,
+      required: true
+    },
+    email: {
+      type: String,
+      required: true
+    }
+  },
+  date: { 
+    type: Date, 
+    default: Date.now 
+  },
+  // ✅ မှတ်ချက် (Optional)
+  remark: {
+    type: String,
+    trim: true,
+    maxlength: 200
+  }
+}, {
+  timestamps: true
 });
+
+// ✅ Indexes for better query performance
+transactionSchema.index({ performedBy: 1 });
+transactionSchema.index({ performedBy: 1, action: 1 });
+transactionSchema.index({ date: -1 });
 
 module.exports = mongoose.model('Transaction', transactionSchema);

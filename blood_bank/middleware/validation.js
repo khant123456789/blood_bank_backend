@@ -2,7 +2,7 @@
 const { body, validationResult } = require('express-validator');
 
 const validBloodTypes = ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'];
-const validComponents = ['Whole Blood', 'Pack Cell', 'FFP', 'PRP'];
+const validComponents = ['WB', 'PC', 'FFP', 'PRP'];
 
 const validate = (req, res, next) => {
     const errors = validationResult(req);

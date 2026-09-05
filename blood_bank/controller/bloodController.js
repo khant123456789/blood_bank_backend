@@ -1,11 +1,19 @@
 // blood_bank/controller/bloodController.js
 const stockService = require('../service/bloodService');
 
-// ✅ Controller မှာ Validation မပါတော့ပါ (Middleware က လုပ်ပြီးသား)
+// ✅ Add Stock - req.user ကို passed လုပ်ပါ
 const addStock = async (req, res) => {
     try {
         const { bloodType, component, quantity } = req.body;
-        const result = await stockService.addStock(bloodType, component, quantity);
+        
+        // ✅ req.user ကို service ကို passed လုပ်ပါ
+        const result = await stockService.addStock(
+            bloodType, 
+            component, 
+            quantity, 
+            req.user  // ✅ လက်ရှိ user
+        );
+        
         res.status(201).json(result);
     } catch (error) {
         res.status(500).json({ 
@@ -15,10 +23,16 @@ const addStock = async (req, res) => {
     }
 };
 
+// ✅ Issue Stock - req.user ကို passed လုပ်ပါ
 const issueStock = async (req, res) => {
     try {
         const { bloodType, component, quantity } = req.body;
-        const result = await stockService.issueStock(bloodType, component, quantity);
+        const result = await stockService.issueStock(
+            bloodType, 
+            component, 
+            quantity, 
+            req.user  // ✅ လက်ရှိ user
+        );
         res.status(200).json(result);
     } catch (error) {
         res.status(400).json({ 
@@ -28,10 +42,16 @@ const issueStock = async (req, res) => {
     }
 };
 
+// ✅ Expire Stock - req.user ကို passed လုပ်ပါ
 const expireStock = async (req, res) => {
     try {
         const { bloodType, component, quantity } = req.body;
-        const result = await stockService.expireStock(bloodType, component, quantity);
+        const result = await stockService.expireStock(
+            bloodType, 
+            component, 
+            quantity, 
+            req.user  // ✅ လက်ရှိ user
+        );
         res.status(200).json(result);
     } catch (error) {
         res.status(400).json({ 

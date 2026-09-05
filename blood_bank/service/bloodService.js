@@ -7,59 +7,25 @@ const getFullName = (bloodType, component) => {
     return `${bloodType} ${component}`;
 };
 
-const getAllStocks = async () => {
-    const allStock = await Stock.find();
-
-    const bloodTypes = ['A', 'B', 'O', 'AB'];
-    const result = {
-        positive: bloodTypes.map(type => ({ 
-            bloodType: type, 
-            wholeBlood: 0, 
-            ffp: 0, 
-            packCell: 0, 
-            prp: 0 
-        })),
-        negative: bloodTypes.map(type => ({ 
-            bloodType: type, 
-            wholeBlood: 0, 
-            ffp: 0, 
-            packCell: 0, 
-            prp: 0 
-        }))
-    };
-
-    allStock.forEach(item => {
-        const isPositive = item.bloodType.endsWith('+');
-        const baseType = item.bloodType.slice(0, -1);
-
-        const targetArray = isPositive ? result.positive : result.negative;
-        const row = targetArray.find(t => t.bloodType === baseType);
-
-        if (row) {
-            if (item.component === 'WB') row.wholeBlood = item.currentQty;
-            if (item.component === 'FFP') row.ffp = item.currentQty;
-            if (item.component === 'PC') row.packCell = item.currentQty;
-            if (item.component === 'PRP') row.prp = item.currentQty;
-        }
-    });
-
-    return result;
-};
-
-// ✅ Transaction ထည့်ပြီး ပြင်ဆင်ထားတဲ့ Add Stock
-const addStock = async (bloodType, component, quantity) => {
+// ✅ Add Stock - performedBy ထည့်ပါ
+const addStock = async (bloodType, component, quantity, performedBy) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     
     try {
         const fullName = getFullName(bloodType, component);
         
-        // ၁။ Transaction မှတ်တမ်းတင်မယ်
+        // ၁။ Transaction မှတ်တမ်းတင်မယ် (performedBy ပါ)
         await Transaction.create([{
             bloodType, 
             component, 
             quantity, 
-            action: 'Add'
+            action: 'Add',
+            performedBy: {
+                userId: performedBy._id,
+                username: performedBy.username,
+                email: performedBy.email
+            }
         }], { session });
 
         // ၂။ Stock လက်ကျန် တိုးမယ်
@@ -73,7 +39,6 @@ const addStock = async (bloodType, component, quantity) => {
             await stock.save({ session });
         }
         
-        // ✅ Transaction အောင်မြင်ပြီဆိုရင် commit လုပ်ပါ
         await session.commitTransaction();
         session.endSession();
         
@@ -84,19 +49,22 @@ const addStock = async (bloodType, component, quantity) => {
                 bloodType,
                 component,
                 quantityAdded: quantity,
-                currentStock: stock.currentQty
+                currentStock: stock.currentQty,
+                performedBy: {
+                    username: performedBy.username,
+                    email: performedBy.email
+                }
             }
         };
     } catch (error) {
-        // ❌ Error ဖြစ်ရင် rollback လုပ်ပါ
         await session.abortTransaction();
         session.endSession();
         throw error;
     }
 };
 
-// ✅ Issue Stock ကိုလည်း အလားတူ ပြင်ပါ
-const issueStock = async (bloodType, component, quantity) => {
+// ✅ Issue Stock - performedBy ထည့်ပါ
+const issueStock = async (bloodType, component, quantity, performedBy) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     
@@ -115,7 +83,12 @@ const issueStock = async (bloodType, component, quantity) => {
             bloodType, 
             component, 
             quantity, 
-            action: 'Issue'
+            action: 'Issue',
+            performedBy: {
+                userId: performedBy._id,
+                username: performedBy.username,
+                email: performedBy.email
+            }
         }], { session });
 
         await session.commitTransaction();
@@ -128,7 +101,11 @@ const issueStock = async (bloodType, component, quantity) => {
                 bloodType,
                 component,
                 quantityIssued: quantity,
-                currentStock: stock.currentQty
+                currentStock: stock.currentQty,
+                performedBy: {
+                    username: performedBy.username,
+                    email: performedBy.email
+                }
             }
         };
     } catch (error) {
@@ -138,8 +115,8 @@ const issueStock = async (bloodType, component, quantity) => {
     }
 };
 
-// ✅ Expire Stock ကိုလည်း အလားတူ ပြင်ပါ
-const expireStock = async (bloodType, component, quantity) => {
+// ✅ Expire Stock - performedBy ထည့်ပါ
+const expireStock = async (bloodType, component, quantity, performedBy) => {
     const session = await mongoose.startSession();
     session.startTransaction();
     
@@ -158,7 +135,12 @@ const expireStock = async (bloodType, component, quantity) => {
             bloodType, 
             component, 
             quantity, 
-            action: 'Expired'
+            action: 'Expired',
+            performedBy: {
+                userId: performedBy._id,
+                username: performedBy.username,
+                email: performedBy.email
+            }
         }], { session });
 
         await session.commitTransaction();
@@ -171,7 +153,11 @@ const expireStock = async (bloodType, component, quantity) => {
                 bloodType,
                 component,
                 quantityExpired: quantity,
-                currentStock: stock.currentQty
+                currentStock: stock.currentQty,
+                performedBy: {
+                    username: performedBy.username,
+                    email: performedBy.email
+                }
             }
         };
     } catch (error) {
