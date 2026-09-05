@@ -36,9 +36,9 @@ const getAllStocks = async () => {
         const row = targetArray.find(t => t.bloodType === baseType);
 
         if (row) {
-            if (item.component === 'Whole Blood') row.wholeBlood = item.currentQty;
+            if (item.component === 'WB') row.wholeBlood = item.currentQty;
             if (item.component === 'FFP') row.ffp = item.currentQty;
-            if (item.component === 'Pack Cell') row.packCell = item.currentQty;
+            if (item.component === 'PC') row.packCell = item.currentQty;
             if (item.component === 'PRP') row.prp = item.currentQty;
         }
     });

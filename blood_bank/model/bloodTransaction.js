@@ -8,7 +8,7 @@ const transactionSchema = new mongoose.Schema({
   },
   component: { 
     type: String, 
-    enum: ['Whole Blood', 'Pack Cell', 'FFP','PRP'], 
+    enum: ['WB', 'PC','FFP','PRP'], 
     required: true 
   },
   quantity: { 
