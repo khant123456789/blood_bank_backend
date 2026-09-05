@@ -30,6 +30,12 @@ router.post(
     bloodStockValidation,
     stockController.expireStock
 );
+router.get(
+    '/transactions',
+    protect,
+    admin,
+    stockController.getTransactions
+);
 
 // ============================================
 // USER ROUTES
