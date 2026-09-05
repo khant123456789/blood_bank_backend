@@ -1,6 +1,6 @@
-const User = require('../models/User');
-const tokenService = require('../services/tokenService');
-const { ROLES, STATUS } = require('../constant/authConstants');
+const User = require('../../auth/models/User');
+const tokenService = require('../../auth/services/tokenService');
+const { ROLES, STATUS } = require('../../auth/constant/authConstants');
 
 const protect = async (req, res, next) => {
     try {

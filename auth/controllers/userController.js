@@ -119,9 +119,20 @@ class UserController {
   // Logout
   async logout(req, res, next) {
     try {
-      const refreshToken = req.cookies.refreshToken;
+      // ✅ req.user ရှိမရှိ စစ်ပါ
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Unauthorized: User not authenticated'
+        });
+      }
+
+      // ✅ refreshToken ကို safe ယူပါ (optional chaining)
+      const refreshToken = req.cookies?.refreshToken;
       const ipAddress = getClientIP(req);
       const userAgent = getUserAgent(req);
+
+      console.log(`📤 Logout: ${req.user.email}`);
 
       const result = await userService.logout(
         req.user._id,
@@ -130,20 +141,31 @@ class UserController {
         userAgent,
       );
 
-      // Clear cookie - Path ကိုထည့်
-      res.clearCookie("refreshToken", { path: "/" }); // ← ✅ path ထည့်
-
+      res.clearCookie("refreshToken", { path: "/" });
       res.status(200).json(result);
     } catch (error) {
+      console.error('❌ Logout error:', error);
       next(error);
     }
   }
 
-  // Logout All
+  // ============================================
+  // ✅ LOGOUT ALL - ပြင်ဆင်ပြီး
+  // ============================================
   async logoutAll(req, res, next) {
     try {
+      // ✅ req.user ရှိမရှိ စစ်ပါ
+      if (!req.user) {
+        return res.status(401).json({
+          success: false,
+          message: 'Unauthorized: User not authenticated'
+        });
+      }
+
       const ipAddress = getClientIP(req);
       const userAgent = getUserAgent(req);
+
+      console.log(`📤 LogoutAll: ${req.user.email}`);
 
       const result = await userService.logoutAll(
         req.user._id,
@@ -151,15 +173,13 @@ class UserController {
         userAgent,
       );
 
-      // Clear cookie - Path ကိုထည့်
-      res.clearCookie("refreshToken", { path: "/" }); // ← ✅ path ထည့်
-
+      res.clearCookie("refreshToken", { path: "/" });
       res.status(200).json(result);
     } catch (error) {
+      console.error('❌ LogoutAll error:', error);
       next(error);
     }
   }
-
   // ============================================
   // PROFILE MANAGEMENT
   // ============================================
